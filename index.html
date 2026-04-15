@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Pledge Leaderboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&amp;family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8efe4;
+      --bg-deep: #f0dcc8;
+      --surface: rgba(255, 249, 242, 0.8);
+      --surface-strong: #fffaf4;
+      --ink: #1f1720;
+      --muted: #5e5160;
+      --rose: #bf5f72;
+      --rose-deep: #8d3148;
+      --gold: #d0a043;
+      --gold-soft: #f2d8a1;
+      --shadow: 0 22px 55px rgba(92, 51, 63, 0.16);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --max-width: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Outfit", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(208, 160, 67, 0.22), transparent 32%),
+        radial-gradient(circle at 88% 10%, rgba(191, 95, 114, 0.18), transparent 24%),
+        linear-gradient(180deg, #fff9f2 0%, var(--bg) 42%, var(--bg-deep) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 40%),
+        radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.18), transparent 26%);
+      opacity: 0.9;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      width: min(calc(100% - 32px), var(--max-width));
+      margin: 0 auto;
+      padding: 28px 0 64px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(28px, 5vw, 54px);
+      border-radius: 34px;
+      background:
+        linear-gradient(145deg, rgba(255, 250, 244, 0.92), rgba(254, 241, 229, 0.88)),
+        linear-gradient(130deg, rgba(208, 160, 67, 0.14), rgba(191, 95, 114, 0.08));
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(143, 91, 101, 0.16);
+      isolation: isolate;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(4px);
+      opacity: 0.72;
+      z-index: -1;
+    }
+
+    .hero::before {
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(208, 160, 67, 0.24), transparent 70%);
+      right: -40px;
+      top: -80px;
+    }
+
+    .hero::after {
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(191, 95, 114, 0.22), transparent 70%);
+      left: -60px;
+      bottom: -100px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(143, 91, 101, 0.12);
+      color: var(--rose-deep);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+    }
+
+    .eyebrow__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--gold), #c27b34);
+      box-shadow: 0 0 0 5px rgba(208, 160, 67, 0.14);
+    }
+
+    .hero__grid {
+      display: grid;
+      gap: 28px;
+      align-items: end;
+      grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.9fr);
+      margin-top: 22px;
+    }
+
+    .hero__title {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-size: clamp(3.2rem, 9vw, 6.6rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      max-width: 9ch;
+    }
+
+    .hero__copy {
+      max-width: 54ch;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      line-height: 1.6;
+    }
+
+    .hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 10px 15px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.75);
+      color: var(--ink);
+      font-weight: 600;
+      border: 1px solid rgba(143, 91, 101, 0.14);
+      backdrop-filter: blur(8px);
+    }
+
+    .badge__status {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--gold);
+      box-shadow: 0 0 0 5px rgba(208, 160, 67, 0.15);
+      flex: 0 0 auto;
+    }
+
+    .button {
+      min-height: 46px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 999px;
+      color: #fffaf4;
+      background: linear-gradient(135deg, var(--rose-deep), var(--rose));
+      box-shadow: 0 14px 26px rgba(141, 49, 72, 0.22);
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    }
+
+    .button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 30px rgba(141, 49, 72, 0.24);
+    }
+
+    .button:disabled {
+      cursor: wait;
+      opacity: 0.72;
+    }
+
+    .hero__stats {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .stat-card {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(143, 91, 101, 0.12);
+      box-shadow: 0 10px 24px rgba(120, 70, 82, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-card__value {
+      display: block;
+      font-size: clamp(1.35rem, 3vw, 2.1rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .stat-card__label {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .layout {
+      display: grid;
+      gap: 24px;
+      margin-top: 24px;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .podium-panel,
+    .leaderboard-panel,
+    .setup-panel {
+      padding: clamp(20px, 4vw, 28px);
+      border-radius: 28px;
+      background: rgba(255, 250, 244, 0.72);
+      border: 1px solid rgba(143, 91, 101, 0.14);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      letter-spacing: -0.04em;
+    }
+
+    .section-title p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 42ch;
+      line-height: 1.5;
+    }
+
+    .podium {
+      display: grid;
+      gap: 16px;
+      align-items: end;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .podium-card {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      min-height: 250px;
+      padding: 22px;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 247, 238, 0.72)),
+        rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(143, 91, 101, 0.12);
+      box-shadow: 0 16px 35px rgba(99, 62, 73, 0.12);
+      transform: translateY(0);
+      animation: rise-in 520ms ease both;
+    }
+
+    .podium-card::before {
+      content: "";
+      position: absolute;
+      inset: auto auto -40px -10px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(208, 160, 67, 0.18), transparent 70%);
+    }
+
+    .podium-card--1 {
+      min-height: 320px;
+      background:
+        linear-gradient(180deg, rgba(255, 251, 242, 0.96), rgba(245, 223, 180, 0.46)),
+        rgba(255, 255, 255, 0.76);
+      border-color: rgba(208, 160, 67, 0.32);
+    }
+
+    .podium-card--2 {
+      min-height: 290px;
+    }
+
+    .podium-card--3 {
+      min-height: 270px;
+    }
+
+    .podium-card__rank {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 999px;
+      background: rgba(31, 23, 32, 0.08);
+      color: var(--ink);
+      font-family: "Fraunces", serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+
+    .podium-card--1 .podium-card__rank {
+      background: linear-gradient(180deg, var(--gold), #c98335);
+      color: #fffaf4;
+      box-shadow: 0 12px 26px rgba(208, 160, 67, 0.28);
+    }
+
+    .podium-card__name {
+      margin: 18px 0 6px;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .podium-card__score {
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
+      font-weight: 700;
+      color: var(--rose-deep);
+    }
+
+    .podium-card__note {
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .leaderboard-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .leaderboard-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 16px;
+      align-items: center;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(143, 91, 101, 0.1);
+      box-shadow: 0 10px 22px rgba(120, 70, 82, 0.08);
+      animation: rise-in 520ms ease both;
+    }
+
+    .leaderboard-row__rank {
+      display: grid;
+      place-items: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(191, 95, 114, 0.14), rgba(208, 160, 67, 0.18));
+      color: var(--rose-deep);
+      font-family: "Fraunces", serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+    }
+
+    .leaderboard-row__main {
+      min-width: 0;
+    }
+
+    .leaderboard-row__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .leaderboard-row__name {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .leaderboard-row__score {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .leaderboard-row__meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .leaderboard-row__bar {
+      width: 100%;
+      height: 12px;
+      margin-top: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(191, 95, 114, 0.1);
+    }
+
+    .leaderboard-row__bar > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(135deg, var(--gold), var(--rose));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      transform-origin: left center;
+      animation: scale-in 640ms ease both;
+    }
+
+    .empty-state {
+      padding: 20px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px dashed rgba(143, 91, 101, 0.22);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .setup-panel {
+      display: none;
+    }
+
+    .setup-panel.is-visible {
+      display: block;
+    }
+
+    details {
+      overflow: hidden;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.64);
+      border: 1px solid rgba(143, 91, 101, 0.12);
+    }
+
+    summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 18px 20px;
+      font-weight: 700;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .setup-content {
+      padding: 0 20px 20px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .setup-content p,
+    .setup-content ol {
+      margin: 0 0 14px;
+    }
+
+    .setup-content code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(31, 23, 32, 0.08);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.95em;
+    }
+
+    .status-text {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .notice {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 248, 234, 0.88);
+      border: 1px solid rgba(208, 160, 67, 0.24);
+      color: #5a4120;
+      line-height: 1.55;
+      display: none;
+    }
+
+    .notice.is-visible {
+      display: block;
+    }
+
+    @keyframes rise-in {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scale-in {
+      from {
+        transform: scaleX(0.2);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    @media (max-width: 960px) {
+      .hero__grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .hero__stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .podium {
+        grid-template-columns: 1fr;
+      }
+
+      .podium-card,
+      .podium-card--1,
+      .podium-card--2,
+      .podium-card--3 {
+        min-height: 220px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page-shell {
+        width: min(calc(100% - 22px), var(--max-width));
+        padding-top: 16px;
+        padding-bottom: 36px;
+      }
+
+      .hero {
+        border-radius: 28px;
+      }
+
+      .hero__stats {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        flex-direction: column;
+        align-items: start;
+      }
+
+      .leaderboard-row {
+        grid-template-columns: 1fr;
+      }
+
+      .leaderboard-row__rank {
+        width: 52px;
+        height: 52px;
+      }
+
+      .leaderboard-row__top,
+      .leaderboard-row__meta {
+        align-items: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="eyebrow">
+        <span class="eyebrow__dot"></span>
+        <span id="eyebrow-label">Spring 2026 / Sorority Fundraiser</span>
+      </div>
+
+      <div class="hero__grid">
+        <div>
+          <h1 class="hero__title" id="page-title">Top Pledge Leaderboard</h1>
+          <p class="hero__copy" id="page-subtitle">
+            Live rankings for your top pledge competition, automatically sorted by the highest total.
+          </p>
+
+          <div class="hero__actions">
+            <div class="badge" id="data-source-badge">
+              <span class="badge__status"></span>
+              <span id="data-source-label">Sample data loaded</span>
+            </div>
+            <button class="button" id="refresh-button" type="button">Refresh Rankings</button>
+          </div>
+
+          <div class="notice" id="status-notice"></div>
+        </div>
+
+        <div class="hero__stats">
+          <article class="stat-card">
+            <span class="stat-card__value" id="leader-name">-</span>
+            <span class="stat-card__label">Current leader</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__value" id="total-score">-</span>
+            <span class="stat-card__label" id="total-label">Total raised</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__value" id="entrant-count">0</span>
+            <span class="stat-card__label">Competitors</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-card__value" id="last-updated">-</span>
+            <span class="stat-card__label">Last synced</span>
+          </article>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="podium-panel">
+        <div class="section-title">
+          <div>
+            <h2>Front Runners</h2>
+            <p>The top three update automatically whenever the connected sheet changes.</p>
+          </div>
+          <div class="status-text" id="podium-status">Waiting for rankings...</div>
+        </div>
+        <div class="podium" id="podium"></div>
+      </section>
+
+      <section class="leaderboard-panel">
+        <div class="section-title">
+          <div>
+            <h2>Full Leaderboard</h2>
+            <p>Sorted highest to lowest with a live progress bar against the current leader.</p>
+          </div>
+        </div>
+        <div class="leaderboard-list" id="leaderboard-list"></div>
+      </section>
+
+      <section class="setup-panel" id="setup-panel">
+        <details>
+          <summary>Google Sheets Setup</summary>
+          <div class="setup-content">
+            <p>To make this leaderboard live, use either <code>Name</code> + <code>Points</code> or <code>First Name</code> + <code>Last Name</code> + <code>Points</code>. An optional <code>Note</code> column still works too.</p>
+            <ol>
+              <li>Put your pledge names and totals into a Google Sheet.</li>
+              <li>Make the sheet public or use <code>File &gt; Share &gt; Publish to web</code> so the browser can read it.</li>
+              <li>Open this file and paste either your normal Google Sheets link into <code>CONFIG.googleSheet.sheetUrl</code> or a published CSV link into <code>CONFIG.googleSheet.publishedCsvUrl</code>.</li>
+              <li>Host the page with GitHub Pages, Netlify, or any simple web server so the browser can fetch the sheet.</li>
+            </ol>
+            <p>If you would rather show dollars later, switch <code>scoreFormat</code> back to <code>"currency"</code> and update <code>scoreLabel</code>.</p>
+          </div>
+        </details>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const CONFIG = {
+      eyebrowLabel: "Spring 2026 / Sorority Fundraiser",
+      competitionName: "Top Pledge Leaderboard",
+      subtitle: "Live rankings for your top pledge competition, automatically sorted by the highest point total.",
+      scoreLabel: "Points",
+      scoreFormat: "number",
+      currency: "USD",
+      scorePrefix: "",
+      scoreSuffix: "",
+      showSetupGuide: true,
+      googleSheet: {
+        // Easiest option: paste your normal Google Sheets share link here.
+        sheetUrl: "",
+
+        // You can also paste a published Google Sheets CSV URL here.
+        publishedCsvUrl: "",
+
+        // Optional fallback: for a public sheet, you can also provide the sheet ID + gid.
+        sheetId: "",
+        gid: "0"
+      },
+      fallbackEntries: [
+        { name: "Avery R.", score: 4825, note: "Top recruiter" },
+        { name: "Naomi T.", score: 4510, note: "Strongest event night" },
+        { name: "Camila J.", score: 4290, note: "Biggest weekly jump" },
+        { name: "Jordan P.", score: 3760, note: "Chapter challenge leader" },
+        { name: "Mia S.", score: 3415, note: "Consistent every round" },
+        { name: "Olivia K.", score: 3180, note: "Top social share boost" },
+        { name: "Harper D.", score: 2875, note: "Fastest late push" }
+      ]
+    };
+
+    const state = {
+      entries: [],
+      sourceLabel: "Sample data",
+      error: ""
+    };
+
+    const elements = {
+      eyebrowLabel: document.getElementById("eyebrow-label"),
+      pageTitle: document.getElementById("page-title"),
+      pageSubtitle: document.getElementById("page-subtitle"),
+      totalLabel: document.getElementById("total-label"),
+      dataSourceLabel: document.getElementById("data-source-label"),
+      leaderName: document.getElementById("leader-name"),
+      totalScore: document.getElementById("total-score"),
+      entrantCount: document.getElementById("entrant-count"),
+      lastUpdated: document.getElementById("last-updated"),
+      podiumStatus: document.getElementById("podium-status"),
+      podium: document.getElementById("podium"),
+      leaderboardList: document.getElementById("leaderboard-list"),
+      refreshButton: document.getElementById("refresh-button"),
+      setupPanel: document.getElementById("setup-panel"),
+      statusNotice: document.getElementById("status-notice")
+    };
+
+    function initializePage() {
+      document.title = CONFIG.competitionName;
+      elements.eyebrowLabel.textContent = CONFIG.eyebrowLabel;
+      elements.pageTitle.textContent = CONFIG.competitionName;
+      elements.pageSubtitle.textContent = CONFIG.subtitle;
+      elements.totalLabel.textContent = `Total ${CONFIG.scoreLabel.toLowerCase()}`;
+      elements.setupPanel.classList.toggle("is-visible", CONFIG.showSetupGuide);
+
+      if (location.protocol === "file:") {
+        showNotice("Live Google Sheets sync works best when this page is served through a local server or hosted site instead of opening the file directly.");
+      }
+    }
+
+    function buildCsvUrlFromSheetId(sheetId, gid = "0") {
+      return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${encodeURIComponent(gid)}`;
+    }
+
+    function parseGoogleSheetLink(sheetUrl) {
+      try {
+        const url = new URL(sheetUrl);
+        const match = url.pathname.match(/\/spreadsheets\/d\/([^/]+)/);
+
+        if (!match) {
+          return null;
+        }
+
+        const sheetId = match[1];
+        const searchGid = url.searchParams.get("gid");
+        const hashMatch = url.hash.match(/gid=([0-9]+)/);
+        const gid = searchGid || (hashMatch ? hashMatch[1] : "") || CONFIG.googleSheet.gid || "0";
+
+        return {
+          sheetId,
+          gid
+        };
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function getSheetUrl() {
+      if (CONFIG.googleSheet.sheetUrl) {
+        const parsedSheet = parseGoogleSheetLink(CONFIG.googleSheet.sheetUrl.trim());
+        if (parsedSheet) {
+          return buildCsvUrlFromSheetId(parsedSheet.sheetId, parsedSheet.gid);
+        }
+      }
+
+      if (CONFIG.googleSheet.publishedCsvUrl) {
+        return CONFIG.googleSheet.publishedCsvUrl.trim();
+      }
+
+      if (CONFIG.googleSheet.sheetId) {
+        const sheetId = CONFIG.googleSheet.sheetId.trim();
+        const gid = (CONFIG.googleSheet.gid || "0").trim();
+        return buildCsvUrlFromSheetId(sheetId, gid);
+      }
+
+      return "";
+    }
+
+    function parseCsv(csvText) {
+      const rows = [];
+      let row = [];
+      let value = "";
+      let inQuotes = false;
+
+      for (let index = 0; index < csvText.length; index += 1) {
+        const char = csvText[index];
+        const next = csvText[index + 1];
+
+        if (char === "\"") {
+          if (inQuotes && next === "\"") {
+            value += "\"";
+            index += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+          continue;
+        }
+
+        if (char === "," && !inQuotes) {
+          row.push(value.trim());
+          value = "";
+          continue;
+        }
+
+        if ((char === "\n" || char === "\r") && !inQuotes) {
+          if (char === "\r" && next === "\n") {
+            index += 1;
+          }
+          row.push(value.trim());
+          if (row.some((cell) => cell !== "")) {
+            rows.push(row);
+          }
+          row = [];
+          value = "";
+          continue;
+        }
+
+        value += char;
+      }
+
+      if (value.length > 0 || row.length > 0) {
+        row.push(value.trim());
+        if (row.some((cell) => cell !== "")) {
+          rows.push(row);
+        }
+      }
+
+      return rows;
+    }
+
+    function normalizeHeader(header) {
+      return header.toLowerCase().trim().replace(/[^a-z0-9]+/g, " ");
+    }
+
+    function findColumnIndex(headers, aliases) {
+      const normalized = headers.map(normalizeHeader);
+
+      return normalized.findIndex((header) =>
+        aliases.some((alias) => header === alias || header.includes(alias))
+      );
+    }
+
+    function parseNumber(value) {
+      const cleaned = String(value || "").replace(/[^0-9.-]+/g, "");
+      const number = Number(cleaned);
+      return Number.isFinite(number) ? number : Number.NaN;
+    }
+
+    function assignRanks(entries) {
+      let previousScore = null;
+      let previousRank = 0;
+
+      return entries.map((entry, index) => {
+        const rank = entry.score === previousScore ? previousRank : index + 1;
+        previousScore = entry.score;
+        previousRank = rank;
+        return { ...entry, rank };
+      });
+    }
+
+    function normalizeEntries(entries) {
+      const sorted = [...entries]
+        .filter((entry) => entry.name && Number.isFinite(entry.score))
+        .sort((left, right) => right.score - left.score || left.name.localeCompare(right.name));
+
+      return assignRanks(sorted);
+    }
+
+    function rowsToEntries(rows) {
+      if (!rows.length) {
+        return [];
+      }
+
+      const headers = rows[0];
+      const nameIndex = findColumnIndex(headers, ["name", "full name", "pledge", "pledge name", "member", "contestant"]);
+      const firstNameIndex = findColumnIndex(headers, ["first name", "firstname", "first"]);
+      const lastNameIndex = findColumnIndex(headers, ["last name", "lastname", "last", "surname", "family name"]);
+      const scoreIndex = findColumnIndex(headers, [
+        "points",
+        "raised",
+        "amount",
+        "amount raised",
+        "total raised",
+        "pledged",
+        "pledges",
+        "score",
+        "total"
+      ]);
+      const noteIndex = findColumnIndex(headers, ["note", "notes", "class", "group", "team", "supporters", "donors"]);
+
+      const fallbackNameIndex = nameIndex >= 0 ? nameIndex : 0;
+      const safeScoreIndex = scoreIndex >= 0 ? scoreIndex : 1;
+      const safeNoteIndex = noteIndex >= 0 ? noteIndex : -1;
+
+      const entries = rows.slice(1).map((row) => {
+        const fullName = nameIndex >= 0 ? (row[nameIndex] || "").trim() : "";
+        const firstName = firstNameIndex >= 0 ? (row[firstNameIndex] || "").trim() : "";
+        const lastName = lastNameIndex >= 0 ? (row[lastNameIndex] || "").trim() : "";
+        const combinedName = [firstName, lastName].filter(Boolean).join(" ").trim();
+        const fallbackName = (row[fallbackNameIndex] || "").trim();
+
+        return {
+          name: fullName || combinedName || fallbackName,
+          score: parseNumber(row[safeScoreIndex]),
+          note: safeNoteIndex >= 0 ? (row[safeNoteIndex] || "").trim() : ""
+        };
+      });
+
+      return normalizeEntries(entries);
+    }
+
+    function formatScore(value) {
+      if (!Number.isFinite(value)) {
+        return "-";
+      }
+
+      if (CONFIG.scoreFormat === "currency") {
+        return new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: CONFIG.currency,
+          maximumFractionDigits: 0
+        }).format(value);
+      }
+
+      const formatted = new Intl.NumberFormat("en-US", {
+        maximumFractionDigits: 0
+      }).format(value);
+
+      return `${CONFIG.scorePrefix}${formatted}${CONFIG.scoreSuffix}`;
+    }
+
+    function formatDateTime(date) {
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(date);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function showNotice(message) {
+      elements.statusNotice.textContent = message;
+      elements.statusNotice.classList.add("is-visible");
+    }
+
+    function clearNotice() {
+      elements.statusNotice.textContent = "";
+      elements.statusNotice.classList.remove("is-visible");
+    }
+
+    function renderPodium(entries) {
+      if (!entries.length) {
+        elements.podium.innerHTML = `
+          <div class="empty-state">
+            Add competitors to your fallback list or connect a Google Sheet to populate the front runners.
+          </div>
+        `;
+        return;
+      }
+
+      const ordered = [entries[1], entries[0], entries[2]].filter(Boolean);
+
+      elements.podium.innerHTML = ordered.map((entry) => `
+        <article class="podium-card podium-card--${entry.rank}">
+          <div class="podium-card__rank">${entry.rank}</div>
+          <h3 class="podium-card__name">${escapeHtml(entry.name)}</h3>
+          <div class="podium-card__score">${formatScore(entry.score)}</div>
+          <div class="podium-card__note">${escapeHtml(entry.note || `Currently ranked #${entry.rank}`)}</div>
+        </article>
+      `).join("");
+    }
+
+    function renderLeaderboard(entries) {
+      if (!entries.length) {
+        elements.leaderboardList.innerHTML = `
+          <div class="empty-state">
+            No leaderboard rows were found. Double-check your Google Sheet headers and make sure there is a name column and a score column.
+          </div>
+        `;
+        return;
+      }
+
+      const topScore = entries[0].score || 1;
+
+      elements.leaderboardList.innerHTML = entries.map((entry) => {
+        const progress = Math.max(12, Math.round((entry.score / topScore) * 100));
+        const detail = entry.note || `${CONFIG.scoreLabel} total`;
+
+        return `
+          <article class="leaderboard-row">
+            <div class="leaderboard-row__rank">${entry.rank}</div>
+            <div class="leaderboard-row__main">
+              <div class="leaderboard-row__top">
+                <h3 class="leaderboard-row__name">${escapeHtml(entry.name)}</h3>
+                <div class="leaderboard-row__score">${formatScore(entry.score)}</div>
+              </div>
+              <div class="leaderboard-row__meta">
+                <span>${escapeHtml(detail)}</span>
+                <span>${Math.round((entry.score / topScore) * 100)}% of leader</span>
+              </div>
+              <div class="leaderboard-row__bar">
+                <span style="width: ${Math.min(progress, 100)}%"></span>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderStats(entries) {
+      const leader = entries[0];
+      const total = entries.reduce((sum, entry) => sum + entry.score, 0);
+
+      elements.leaderName.textContent = leader ? leader.name : "-";
+      elements.totalScore.textContent = formatScore(total);
+      elements.entrantCount.textContent = String(entries.length);
+      elements.lastUpdated.textContent = formatDateTime(new Date());
+      elements.dataSourceLabel.textContent = state.sourceLabel;
+      elements.podiumStatus.textContent = leader
+        ? `${leader.name} is currently in first place.`
+        : "Waiting for rankings...";
+    }
+
+    function render(entries) {
+      state.entries = entries;
+      renderPodium(entries.slice(0, 3));
+      renderLeaderboard(entries);
+      renderStats(entries);
+    }
+
+    async function fetchSheetEntries() {
+      const url = getSheetUrl();
+
+      if (!url) {
+        state.sourceLabel = "Sample data loaded";
+        return normalizeEntries(CONFIG.fallbackEntries);
+      }
+
+      const response = await fetch(url, {
+        method: "GET",
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error(`Google Sheet request failed with status ${response.status}.`);
+      }
+
+      const csvText = await response.text();
+      const rows = parseCsv(csvText);
+      const entries = rowsToEntries(rows);
+
+      if (!entries.length) {
+        throw new Error("No competitor rows were found in the connected Google Sheet.");
+      }
+
+      state.sourceLabel = "Google Sheets live";
+      return entries;
+    }
+
+    async function loadLeaderboard() {
+      elements.refreshButton.disabled = true;
+      elements.refreshButton.textContent = "Refreshing...";
+
+      try {
+        clearNotice();
+        const entries = await fetchSheetEntries();
+        render(entries);
+      } catch (error) {
+        console.error(error);
+        state.sourceLabel = "Sample data fallback";
+        render(normalizeEntries(CONFIG.fallbackEntries));
+        showNotice("Google Sheets could not be loaded, so the page is showing the sample leaderboard. Make sure the sheet is public, the CSV URL is correct, and the page is being served from a local or hosted web server.");
+      } finally {
+        elements.refreshButton.disabled = false;
+        elements.refreshButton.textContent = "Refresh Rankings";
+      }
+    }
+
+    elements.refreshButton.addEventListener("click", loadLeaderboard);
+
+    initializePage();
+    loadLeaderboard();
+  </script>
+</body>
+</html>
