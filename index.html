@@ -851,15 +851,7 @@
     }
 
     function assignRanks(entries) {
-      let previousScore = null;
-      let previousRank = 0;
-
-      return entries.map((entry, index) => {
-        const rank = entry.score === previousScore ? previousRank : index + 1;
-        previousScore = entry.score;
-        previousRank = rank;
-        return { ...entry, rank };
-      });
+      return entries.map((entry, index) => ({ ...entry, rank: index + 1 }));
     }
 
     function normalizeEntries(entries) {
