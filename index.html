@@ -706,13 +706,14 @@
       subtitle: "Live rankings for your top pledge competition, automatically sorted by the highest point total.",
       scoreLabel: "Points",
       scoreFormat: "number",
+      autoRefreshMs: 30000,
       currency: "USD",
       scorePrefix: "",
       scoreSuffix: "",
       showSetupGuide: true,
       googleSheet: {
         // Easiest option: paste your normal Google Sheets share link here.
-        sheetUrl: "",
+        sheetUrl: "https://docs.google.com/spreadsheets/d/1c0yh7x020cC3VVxcdPeqQYJC-cPG5Qf2X-sYW5vl3Kg/edit?usp=sharing",
 
         // You can also paste a published Google Sheets CSV URL here.
         publishedCsvUrl: "",
@@ -735,7 +736,9 @@
     const state = {
       entries: [],
       sourceLabel: "Sample data",
-      error: ""
+      error: "",
+      isLoading: false,
+      autoRefreshTimer: null
     };
 
     const elements = {
@@ -773,6 +776,11 @@
       return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${encodeURIComponent(gid)}`;
     }
 
+    function buildJsonpUrlFromSheetId(sheetId, gid = "0", callbackName = "google.visualization.Query.setResponse") {
+      const tqx = `out:json;responseHandler:${callbackName}`;
+      return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=${encodeURIComponent(tqx)}&gid=${encodeURIComponent(gid)}`;
+    }
+
     function parseGoogleSheetLink(sheetUrl) {
       try {
         const url = new URL(sheetUrl);
@@ -796,25 +804,48 @@
       }
     }
 
-    function getSheetUrl() {
+    function getSheetSource() {
       if (CONFIG.googleSheet.sheetUrl) {
         const parsedSheet = parseGoogleSheetLink(CONFIG.googleSheet.sheetUrl.trim());
         if (parsedSheet) {
-          return buildCsvUrlFromSheetId(parsedSheet.sheetId, parsedSheet.gid);
+          return {
+            kind: "google-sheet",
+            sheetId: parsedSheet.sheetId,
+            gid: parsedSheet.gid
+          };
         }
       }
 
-      if (CONFIG.googleSheet.publishedCsvUrl) {
-        return CONFIG.googleSheet.publishedCsvUrl.trim();
-      }
-
       if (CONFIG.googleSheet.sheetId) {
-        const sheetId = CONFIG.googleSheet.sheetId.trim();
-        const gid = (CONFIG.googleSheet.gid || "0").trim();
-        return buildCsvUrlFromSheetId(sheetId, gid);
+        return {
+          kind: "google-sheet",
+          sheetId: CONFIG.googleSheet.sheetId.trim(),
+          gid: (CONFIG.googleSheet.gid || "0").trim()
+        };
       }
 
-      return "";
+      if (CONFIG.googleSheet.publishedCsvUrl) {
+        return {
+          kind: "csv",
+          url: CONFIG.googleSheet.publishedCsvUrl.trim()
+        };
+      }
+
+      return null;
+    }
+
+    function getSheetUrl() {
+      const source = getSheetSource();
+
+      if (!source) {
+        return "";
+      }
+
+      if (source.kind === "google-sheet") {
+        return buildCsvUrlFromSheetId(source.sheetId, source.gid);
+      }
+
+      return source.url;
     }
 
     function parseCsv(csvText) {
@@ -887,6 +918,62 @@
       return Number.isFinite(number) ? number : Number.NaN;
     }
 
+    function extractGoogleSheetRows(response) {
+      if (!response || response.status !== "ok" || !response.table) {
+        throw new Error("Google Sheets returned an invalid response.");
+      }
+
+      const headers = (response.table.cols || []).map((column) => column.label || "");
+      const rows = (response.table.rows || []).map((row) =>
+        (row.c || []).map((cell) => {
+          if (!cell) {
+            return "";
+          }
+
+          if (cell.f !== undefined && cell.f !== null && cell.f !== "") {
+            return String(cell.f);
+          }
+
+          if (cell.v !== undefined && cell.v !== null) {
+            return String(cell.v);
+          }
+
+          return "";
+        })
+      );
+
+      return [headers, ...rows];
+    }
+
+    function loadGoogleSheetJsonp(sheetId, gid = "0") {
+      return new Promise((resolve, reject) => {
+        const callbackName = `__codexSheetCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const script = document.createElement("script");
+        const timeout = window.setTimeout(() => {
+          cleanup();
+          reject(new Error("Google Sheets request timed out."));
+        }, 12000);
+
+        function cleanup() {
+          window.clearTimeout(timeout);
+          delete window[callbackName];
+          script.remove();
+        }
+
+        window[callbackName] = (response) => {
+          cleanup();
+          resolve(response);
+        };
+
+        script.onerror = () => {
+          cleanup();
+          reject(new Error("Google Sheets script could not be loaded."));
+        };
+        script.src = buildJsonpUrlFromSheetId(sheetId, gid, callbackName);
+        document.head.appendChild(script);
+      });
+    }
+
     function assignRanks(entries) {
       let previousScore = null;
       let previousRank = 0;
@@ -932,17 +1019,26 @@
       const fallbackNameIndex = nameIndex >= 0 ? nameIndex : 0;
       const safeScoreIndex = scoreIndex >= 0 ? scoreIndex : 1;
       const safeNoteIndex = noteIndex >= 0 ? noteIndex : -1;
+      const safeFirstNameIndex = firstNameIndex >= 0
+        ? firstNameIndex
+        : (lastNameIndex >= 0 ? nameIndex : -1);
 
       const entries = rows.slice(1).map((row) => {
-        const fullName = nameIndex >= 0 ? (row[nameIndex] || "").trim() : "";
-        const firstName = firstNameIndex >= 0 ? (row[firstNameIndex] || "").trim() : "";
+        const fullName = nameIndex >= 0 && safeFirstNameIndex !== nameIndex
+          ? (row[nameIndex] || "").trim()
+          : "";
+        const firstName = safeFirstNameIndex >= 0 ? (row[safeFirstNameIndex] || "").trim() : "";
         const lastName = lastNameIndex >= 0 ? (row[lastNameIndex] || "").trim() : "";
         const combinedName = [firstName, lastName].filter(Boolean).join(" ").trim();
         const fallbackName = (row[fallbackNameIndex] || "").trim();
+        const rawScore = row[safeScoreIndex];
+        const score = rawScore === "" || rawScore === null || rawScore === undefined
+          ? 0
+          : parseNumber(rawScore);
 
         return {
           name: fullName || combinedName || fallbackName,
-          score: parseNumber(row[safeScoreIndex]),
+          score,
           note: safeNoteIndex >= 0 ? (row[safeNoteIndex] || "").trim() : ""
         };
       });
@@ -977,6 +1073,20 @@
         hour: "numeric",
         minute: "2-digit"
       }).format(date);
+    }
+
+    function formatRefreshInterval(milliseconds) {
+      if (!milliseconds || milliseconds < 1000) {
+        return "live";
+      }
+
+      const seconds = Math.round(milliseconds / 1000);
+      if (seconds < 60) {
+        return `${seconds}s`;
+      }
+
+      const minutes = Math.round(seconds / 60);
+      return `${minutes}m`;
     }
 
     function escapeHtml(value) {
@@ -1024,7 +1134,7 @@
       if (!entries.length) {
         elements.leaderboardList.innerHTML = `
           <div class="empty-state">
-            No leaderboard rows were found. Double-check your Google Sheet headers and make sure there is a name column and a score column.
+            No leaderboard rows were found. Double-check your Google Sheet headers and make sure there is either a Name column or First Name and Last Name columns, plus a Points column.
           </div>
         `;
         return;
@@ -1060,12 +1170,15 @@
     function renderStats(entries) {
       const leader = entries[0];
       const total = entries.reduce((sum, entry) => sum + entry.score, 0);
+      const refreshLabel = CONFIG.autoRefreshMs > 0
+        ? `Auto-updates every ${formatRefreshInterval(CONFIG.autoRefreshMs)}`
+        : "Manual refresh";
 
       elements.leaderName.textContent = leader ? leader.name : "-";
       elements.totalScore.textContent = formatScore(total);
       elements.entrantCount.textContent = String(entries.length);
       elements.lastUpdated.textContent = formatDateTime(new Date());
-      elements.dataSourceLabel.textContent = state.sourceLabel;
+      elements.dataSourceLabel.textContent = `${state.sourceLabel} · ${refreshLabel}`;
       elements.podiumStatus.textContent = leader
         ? `${leader.name} is currently in first place.`
         : "Waiting for rankings...";
@@ -1079,14 +1192,27 @@
     }
 
     async function fetchSheetEntries() {
-      const url = getSheetUrl();
+      const source = getSheetSource();
 
-      if (!url) {
+      if (!source) {
         state.sourceLabel = "Sample data loaded";
         return normalizeEntries(CONFIG.fallbackEntries);
       }
 
-      const response = await fetch(url, {
+      if (source.kind === "google-sheet") {
+        const response = await loadGoogleSheetJsonp(source.sheetId, source.gid);
+        const rows = extractGoogleSheetRows(response);
+        const entries = rowsToEntries(rows);
+
+        if (!entries.length) {
+          throw new Error("No competitor rows were found in the connected Google Sheet.");
+        }
+
+        state.sourceLabel = "Google Sheets live";
+        return entries;
+      }
+
+      const response = await fetch(source.url, {
         method: "GET",
         cache: "no-store"
       });
@@ -1100,14 +1226,19 @@
       const entries = rowsToEntries(rows);
 
       if (!entries.length) {
-        throw new Error("No competitor rows were found in the connected Google Sheet.");
+        throw new Error("No competitor rows were found in the connected CSV feed.");
       }
 
-      state.sourceLabel = "Google Sheets live";
+      state.sourceLabel = "CSV feed live";
       return entries;
     }
 
     async function loadLeaderboard() {
+      if (state.isLoading) {
+        return;
+      }
+
+      state.isLoading = true;
       elements.refreshButton.disabled = true;
       elements.refreshButton.textContent = "Refreshing...";
 
@@ -1121,14 +1252,32 @@
         render(normalizeEntries(CONFIG.fallbackEntries));
         showNotice("Google Sheets could not be loaded, so the page is showing the sample leaderboard. Make sure the sheet is public, the CSV URL is correct, and the page is being served from a local or hosted web server.");
       } finally {
+        state.isLoading = false;
         elements.refreshButton.disabled = false;
         elements.refreshButton.textContent = "Refresh Rankings";
       }
     }
 
+    function startAutoRefresh() {
+      if (!CONFIG.autoRefreshMs || CONFIG.autoRefreshMs <= 0) {
+        return;
+      }
+
+      if (state.autoRefreshTimer) {
+        clearInterval(state.autoRefreshTimer);
+      }
+
+      state.autoRefreshTimer = window.setInterval(() => {
+        if (!document.hidden) {
+          loadLeaderboard();
+        }
+      }, CONFIG.autoRefreshMs);
+    }
+
     elements.refreshButton.addEventListener("click", loadLeaderboard);
 
     initializePage();
+    startAutoRefresh();
     loadLeaderboard();
   </script>
 </body>
