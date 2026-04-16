@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earn Points | Top Pledge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&amp;family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8efe4;
+      --bg-deep: #f0dcc8;
+      --ink: #1f1720;
+      --muted: #5e5160;
+      --rose: #bf5f72;
+      --rose-deep: #8d3148;
+      --gold: #d0a043;
+      --shadow: 0 22px 55px rgba(92, 51, 63, 0.16);
+      --max-width: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Outfit", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(208, 160, 67, 0.22), transparent 32%),
+        radial-gradient(circle at 88% 10%, rgba(191, 95, 114, 0.18), transparent 24%),
+        linear-gradient(180deg, #fff9f2 0%, var(--bg) 42%, var(--bg-deep) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 40%),
+        radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.18), transparent 26%);
+      opacity: 0.9;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      width: min(calc(100% - 32px), var(--max-width));
+      margin: 0 auto;
+      padding: 28px 0 64px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(28px, 5vw, 54px);
+      border-radius: 34px;
+      background:
+        linear-gradient(145deg, rgba(255, 250, 244, 0.94), rgba(254, 241, 229, 0.9)),
+        linear-gradient(130deg, rgba(208, 160, 67, 0.14), rgba(191, 95, 114, 0.08));
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(143, 91, 101, 0.16);
+      isolation: isolate;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(4px);
+      opacity: 0.72;
+      z-index: -1;
+    }
+
+    .hero::before {
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(208, 160, 67, 0.24), transparent 70%);
+      right: -40px;
+      top: -80px;
+    }
+
+    .hero::after {
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(191, 95, 114, 0.22), transparent 70%);
+      left: -60px;
+      bottom: -100px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(143, 91, 101, 0.12);
+      color: var(--rose-deep);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+    }
+
+    .eyebrow__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--gold), #c27b34);
+      box-shadow: 0 0 0 5px rgba(208, 160, 67, 0.14);
+    }
+
+    .hero__grid {
+      display: grid;
+      gap: 26px;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+      align-items: end;
+      margin-top: 22px;
+    }
+
+    .hero__title {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-size: clamp(3rem, 8vw, 6rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      max-width: 8ch;
+    }
+
+    .hero__copy {
+      max-width: 54ch;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.12rem);
+      line-height: 1.6;
+    }
+
+    .hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 999px;
+      color: #fffaf4;
+      text-decoration: none;
+      font: inherit;
+      background: linear-gradient(135deg, var(--rose-deep), var(--rose));
+      box-shadow: 0 14px 26px rgba(141, 49, 72, 0.22);
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 30px rgba(141, 49, 72, 0.24);
+    }
+
+    .button--secondary {
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(143, 91, 101, 0.14);
+      box-shadow: 0 10px 20px rgba(120, 70, 82, 0.1);
+    }
+
+    .button--secondary:hover {
+      box-shadow: 0 14px 24px rgba(120, 70, 82, 0.14);
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .contact-card {
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(143, 91, 101, 0.12);
+      box-shadow: 0 14px 30px rgba(120, 70, 82, 0.1);
+      backdrop-filter: blur(12px);
+    }
+
+    .contact-card__label {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .contact-card__name {
+      margin: 12px 0 4px;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .contact-card__phone {
+      display: inline-block;
+      margin-top: 6px;
+      color: var(--rose-deep);
+      font-size: 1.15rem;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .contact-card__phone:hover {
+      text-decoration: underline;
+    }
+
+    .layout {
+      display: grid;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .missions-panel {
+      padding: clamp(20px, 4vw, 28px);
+      border-radius: 28px;
+      background: rgba(255, 250, 244, 0.72);
+      border: 1px solid rgba(143, 91, 101, 0.14);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      letter-spacing: -0.04em;
+    }
+
+    .section-title p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      max-width: 42ch;
+      line-height: 1.55;
+    }
+
+    .status-text {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .missions-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .mission-card {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 247, 238, 0.78)),
+        rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(191, 95, 114, 0.18);
+      box-shadow: 0 14px 28px rgba(120, 70, 82, 0.1);
+      isolation: isolate;
+    }
+
+    .mission-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -36px -46px auto;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(191, 95, 114, 0.18), transparent 72%);
+      z-index: -1;
+    }
+
+    .mission-card[data-tier="15"] {
+      border-color: rgba(208, 160, 67, 0.28);
+    }
+
+    .mission-card[data-tier="10"] {
+      border-color: rgba(191, 95, 114, 0.24);
+    }
+
+    .mission-card[data-tier="5"] {
+      border-color: rgba(108, 146, 86, 0.24);
+    }
+
+    .mission-card[data-tier="1"] {
+      border-color: rgba(104, 139, 176, 0.24);
+    }
+
+    .mission-card[data-tier="15"]::before {
+      background: radial-gradient(circle, rgba(208, 160, 67, 0.22), transparent 72%);
+    }
+
+    .mission-card[data-tier="10"]::before {
+      background: radial-gradient(circle, rgba(191, 95, 114, 0.2), transparent 72%);
+    }
+
+    .mission-card[data-tier="5"]::before {
+      background: radial-gradient(circle, rgba(108, 146, 86, 0.2), transparent 72%);
+    }
+
+    .mission-card[data-tier="1"]::before {
+      background: radial-gradient(circle, rgba(104, 139, 176, 0.2), transparent 72%);
+    }
+
+    .mission-card__points {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(191, 95, 114, 0.14);
+      color: var(--rose-deep);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .mission-card[data-tier="15"] .mission-card__points {
+      background: rgba(208, 160, 67, 0.16);
+      color: #7a4c06;
+    }
+
+    .mission-card[data-tier="10"] .mission-card__points {
+      background: rgba(191, 95, 114, 0.14);
+      color: var(--rose-deep);
+    }
+
+    .mission-card[data-tier="5"] .mission-card__points {
+      background: rgba(108, 146, 86, 0.16);
+      color: #3f6630;
+    }
+
+    .mission-card[data-tier="1"] .mission-card__points {
+      background: rgba(104, 139, 176, 0.16);
+      color: #355b83;
+    }
+
+    .mission-card__points span:last-child {
+      font-size: 0.82rem;
+      opacity: 0.8;
+    }
+
+    .mission-card__task {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.3;
+    }
+
+    .missions-footer {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(143, 91, 101, 0.12);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+      .hero__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page-shell {
+        width: min(calc(100% - 22px), var(--max-width));
+        padding-top: 16px;
+        padding-bottom: 36px;
+      }
+
+      .hero {
+        border-radius: 28px;
+      }
+
+      .section-title {
+        flex-direction: column;
+        align-items: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="eyebrow">
+        <span class="eyebrow__dot"></span>
+        <span>Spring 2026</span>
+      </div>
+
+      <div class="hero__grid">
+        <div>
+          <h1 class="hero__title">Earn Points</h1>
+
+          <div class="hero__actions">
+            <a class="button button--secondary" href="index.html">Back to Leaderboard</a>
+          </div>
+        </div>
+
+        <div class="contact-list" id="contact-list"></div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="missions-panel">
+        <div class="section-title">
+          <div>
+            <h2>Mission Board</h2>
+          </div>
+          <div class="status-text" id="missions-count"></div>
+        </div>
+
+        <div class="missions-grid" id="missions-grid"></div>
+
+        <div class="missions-footer">
+          Use the phone numbers above for submissions.
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const CONTACTS = [
+      { name: "Taylor", phone: "650-269-0964", phoneHref: "tel:+16502690964" },
+      { name: "Katie", phone: "818-585-9199", phoneHref: "tel:+18185859199" }
+    ];
+
+    const MISSIONS = [
+      { points: 15, task: "Lake Lag streak" },
+      { points: 10, task: "Visit KSIG trap" },
+      { points: 10, task: "Visit SNU basement" },
+      { points: 10, task: "Beat a KA brother in tennis" },
+      { points: 10, task: "Pee on KA lawn (IYKYK)" },
+      { points: 10, task: "Ice the president (Lartandi)" },
+      { points: 10, task: "Take a photo with the last KSIG wedding bride and groom" },
+      { points: 10, task: "Biggest rallier (will decide at the end)" },
+      { points: 5, task: "Fratiest fit for Phrat Bro (we'll vote when the time comes)" },
+      { points: 5, task: "Acquire composite of another org" },
+      { points: 5, task: "Acquire letters from a frat" },
+      { points: 5, task: "Acquire SNU utensils" },
+      { points: 5, task: "Win KSIG scav (+5 for each member of the team)" },
+      { points: 5, task: "Win secret mission (+5 for each member of the team)" },
+      { points: 1, task: "Get a frat guy to hold up the wings (photo evidence)" },
+      { points: 1, task: "Help build Phrat Bro cage" }
+    ];
+
+    const elements = {
+      contactList: document.getElementById("contact-list"),
+      missionsCount: document.getElementById("missions-count"),
+      missionsGrid: document.getElementById("missions-grid")
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function renderContacts() {
+      elements.contactList.innerHTML = CONTACTS.map((contact) => `
+        <article class="contact-card">
+          <p class="contact-card__label">Submit To</p>
+          <h2 class="contact-card__name">${escapeHtml(contact.name)}</h2>
+          <a class="contact-card__phone" href="${escapeHtml(contact.phoneHref)}">${escapeHtml(contact.phone)}</a>
+        </article>
+      `).join("");
+    }
+
+    function renderMissions() {
+      const missions = [...MISSIONS].sort((left, right) => right.points - left.points || left.task.localeCompare(right.task));
+
+      elements.missionsCount.textContent = `${missions.length} ways to score`;
+      elements.missionsGrid.innerHTML = missions.map((mission) => `
+        <article class="mission-card" data-tier="${mission.points}">
+          <div class="mission-card__points">
+            <span>${mission.points}</span>
+            <span>${mission.points === 1 ? "pt" : "pts"}</span>
+          </div>
+          <h3 class="mission-card__task">${escapeHtml(mission.task)}</h3>
+        </article>
+      `).join("");
+    }
+
+    renderContacts();
+    renderMissions();
+  </script>
+</body>
+</html>
